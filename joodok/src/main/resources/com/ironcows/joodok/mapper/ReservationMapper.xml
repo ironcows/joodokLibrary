@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.ReservationMapper">
+	
+	
+	<select id="checkReservation" parameterType="String" resultType="map">
+		SELECT r.reservationNo
+			  ,r.memberNo
+		  FROM reservation r
+		 WHERE r.bookDetailNo = #{value}
+		   AND r.status = '예약'
+	</select>
+	
+	
+	<!-- 회원 본인의 예약 내역 조회하기 -->
+	<select id="getMyReservation" parameterType="Member" resultType="map">
+		SELECT v.reservationNo
+		      ,TO_CHAR(v.registeredDate, 'YYYY-MM-DD') as registeredDate
+		      ,v.title
+		      ,v.subtitle
+		      ,v.applicationMark
+		      ,v.status
+		      ,v.memberNo
+		  FROM v_member_reservation v
+		 WHERE v.memberNo = #{memberNo}
+		 ORDER BY v.registeredDate DESC
+	</select>
+	
+	
+	<!-- 예약 1개 선택 -->
+	<select id="getOneReservation" parameterType="Reservation" resultType="Reservation">
+		SELECT r.reservationNo
+			  ,r.bookDetailNo
+			  ,r.memberNo
+			  ,r.registeredDate
+			  ,r.modifiedDate
+			  ,r.status
+		  FROM reservation r
+		 WHERE r.reservationNo = #{reservationNo}
+	</select>
+	
+	<!-- 예약 1개 등록 -->
+	<insert id="insertReservation" parameterType="Reservation">
+		INSERT INTO reservation(reservationNo
+		 					   ,bookDetailNo
+		 					   ,memberNo
+		 					   ,registeredDate
+		 					   ,status)
+		 	<!-- 없으면 YYMMDD0001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->			   
+		VALUES((SELECT TO_CHAR(sysdate, 'YYMMDD')||NVL(LPAD(MAX(SUBSTR(rb.requestBookNo, 7, 4))+1, 4, '0'), '0001')
+			     FROM requestBook rb
+			    WHERE TO_CHAR(sysdate, 'YYMMDD') = SUBSTR(rb.requestBookNo, 1, 6))
+			  ,#{bookDetailNo}
+			  ,#{memberNo}
+			  ,sysdate
+			  ,'예약')
+	</insert>
+	
+	<!-- 예약 1개 수정 -->
+	<update id="updateReservation" parameterType="Reservation">
+		UPDATE reservation r
+		<set>
+			<if test="status != null">
+				r.status = #{status},
+			</if>
+				r.modifiedDate = sysdate
+		</set>
+		 WHERE r.reservationNo = #{reservationNo}
+		<trim prefix="SET" suffixOverrides=","/>
+	</update>
+	
+	
+</mapper>

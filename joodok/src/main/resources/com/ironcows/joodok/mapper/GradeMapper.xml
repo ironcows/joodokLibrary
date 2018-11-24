@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+          
+<mapper namespace="com.ironcows.joodok.mapper.GradeMapper">
+	
+	<!-- 등급 1개 선택 -->
+	<select id="getOneGrade" parameterType="Grade" resultType="Grade">
+		SELECT g.gradeNo
+			  ,g.registeredDate
+			  ,g.modifiedDate
+			  ,g.position
+			  ,g.possibleBorrowDay
+		  FROM grade g
+		 WHERE g.gradeNo = #{gradeNo}
+	</select>
+	
+
+</mapper>

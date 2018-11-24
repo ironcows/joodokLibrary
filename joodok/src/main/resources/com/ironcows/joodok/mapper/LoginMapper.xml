@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+          
+          
+<mapper namespace="com.ironcows.joodok.mapper.LoginMapper">
+
+	<!-- Member Login -->
+	<select id="loginMember" parameterType="Member" resultType="Member">
+		SELECT m.memberNo
+			  ,m.id
+			  ,m.name
+		  FROM member m
+		 WHERE m.id = #{id}
+		   AND m.password = #{password}
+	</select>
+
+	<!-- Librarian Login -->
+	<select id="loginLibrarian" parameterType="Librarian" resultType="Librarian">
+		SELECT l.librarianNo
+			  ,l.id
+			  ,l.name
+		  FROM librarian l
+		 WHERE l.id = #{id}
+		   AND l.password = #{password}
+	</select>
+
+
+</mapper>

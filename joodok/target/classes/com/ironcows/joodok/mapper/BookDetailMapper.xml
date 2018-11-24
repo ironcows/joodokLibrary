@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+          
+<mapper namespace="com.ironcows.joodok.mapper.BookDetailMapper">
+
+
+	<!-- 도서 폐기 화면에서 도서 추가를 위해 해당 도서 정보 가져오기 -->
+	<select id="getBookInfoWithDiscard" parameterType="String" resultType="map">
+		SELECT v.bookDetailNo
+		      ,v.title
+		      ,v.subTitle
+		      ,v.volume
+		      ,v.applicationMark
+		      ,v.borrowStatus
+		      ,v.discard
+		  FROM v_bookInfo_with_discard v
+		 WHERE v.bookDetailNo = #{value}
+	</select>
+
+
+
+	<!-- 도서 대출 화면에서 대출 도서 목록을 출력하기 -->
+	<select id="getBookForBorrow" parameterType="String" resultType="map">	
+		SELECT bd.bookDetailNo 
+      		  ,mb.title
+		      ,CASE WHEN mb.subTitle IS NULL THEN ' '
+		            ELSE mb.subTitle
+		            END subTitle
+		      ,CASE WHEN mb.volume IS NULL THEN ' '
+		            ELSE mb.volume
+		            END volume
+		      ,bd.applicationMark
+		  FROM bookDetail bd, metaBook mb
+		 WHERE bd.metaBookNo = mb.metaBookNo
+		   AND bd.bookDetailNo = #{value}
+	</select>
+
+
+	<!-- 검색 결과에서 제목 클릭했을 때 도서 상세 정보 보기 -->
+	<select id="seeBookDetail" parameterType="String" resultType="map">
+		SELECT v.bookDetailNo
+		      ,v.applicationMark
+		      ,v.borrowStatus
+		      ,v.locationName
+		      ,v.detailLocationName
+		      ,v.metaBookNo
+		      ,v.dueDate
+		      ,v.purpose
+		      ,v.duplicate
+		  FROM v_see_book_detail v
+		 WHERE v.metaBookNo = #{value}
+	</select>
+
+	<!-- 도서상세정보 1개 선택 -->
+	<select id="getOneBookDetail" parameterType="BookDetail" resultType="BookDetail">
+		SELECT bd.bookDetailNo
+			  ,bd.metaBookNo
+			  ,bd.detailLocationNo
+			  ,bd.registeredDate
+			  ,bd.modifiedDate
+			  ,bd.duplicate
+			  ,bd.applicationMark
+			  ,bd.purpose
+			  ,bd.borrowStatus
+			  ,bd.discard
+		  FROM bookDetail bd
+		 WHERE bd.bookDetailNo = #{bookDetailNo}
+	</select>
+
+
+	<!-- 도서상세정보 1개 등록 -->
+	<insert id="insertBookDetail" parameterType="BookDetail">
+		INSERT INTO bookDetail(BookDetailNo
+							  ,metaBookNo
+							  ,detailLocationNo
+							  ,registeredDate
+							  ,duplicate
+							  ,applicationMark
+							  ,purpose
+							  ,borrowStatus)
+				<!-- 없으면 0000001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->
+		VALUES ((SELECT NVL(LPAD(LTRIM(MAX(bd.bookDetailNo), '0') + 1, 7, '0'), '0000001') as bookDetailNo
+ 				  FROM bookDetail bd)
+			  , #{metaBookNo}
+			  , #{detailLocationNo}
+			  , sysdate
+			  , #{duplicate} <!-- 처음엔 01 자동으로 02 03 04 로 증가하게 하자 -->
+			  , #{applicationMark}
+			  , #{purpose}
+			  , 'Y' <!-- 등록한 순간부터 대여할 일이 없으므로 대여가능인 Y로 할당 -->)
+	</insert>
+
+
+	<!-- 도서상세정보 1개 수정 -->
+	<update id="updateBookDetail" parameterType="BookDetail">
+		UPDATE bookDetail bd
+		<set>
+			<if test="detailLocationNo != null">
+				bd.detailLocationNo = #{detailLocationNo},
+			</if>
+			<if test="duplicate != null">
+				bd.duplicate = #{duplicate},
+			</if>
+			<if test="applicationMark != null">
+				bd.applicationMark = #{applicationMark},
+			</if>
+			<if test="purpose != null">
+				bd.purpose = #{purpose},
+			</if>
+			<if test="borrowStatus != null">
+				bd.borrowStatus = #{borrowStatus},
+			</if>
+			<if test="discard != null">
+				bd.discard = #{discard},
+			</if>
+			bd.modifiedDate = sysdate
+		</set>
+		 WHERE bd.bookDetailNo = #{bookDetailNo}
+		 <trim prefix="SET" suffixOverrides=","/>
+	</update>
+	
+	
+</mapper>

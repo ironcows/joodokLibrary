@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.CheckUpListMapper">
+
+
+	<!-- 도서 상세정보 등록을 위해 등록 대기 도서 목록을 가져오기 -->
+	<select id="getPreRegisterDetailList" parameterType="String" resultType="map">
+		SELECT v.checkUpListNo
+		      ,v.checkUpIsbn
+		      ,v.title
+		      ,v.author
+		      ,v.publisher
+		      ,v.checkUpResult
+      		  ,v.metaBookNo
+		  FROM v_preRegistered_checkUpList v
+		 WHERE v.checkUpIsbn = #{value}	
+	</select>
+
+	<!-- 도서 상세정보 등록을 위해 미등록 도서 목록을 가져오기 -->
+	<select id="getUnRegisteredBookList" resultType="map">
+		SELECT v.num
+		      ,v.checkUpIsbn
+		      ,v.title
+		      ,v.author
+		      ,v.publisher
+		  FROM v_unRegistered_checkUpList v
+	</select>
+
+	<!-- 검수내역 1개 선택 -->
+	<select id="getOneCheckUpList" parameterType="CheckUpList" resultType="CheckUpList">
+		SELECT cl.checkUpListNo
+		      ,cl.acquisitionNo
+		      ,cl.checkUpNo
+		      ,cl.registeredDate
+		      ,cl.modifiedDate
+		      ,cl.checkUpResult
+		      ,cl.memo
+		      ,cl.checkUpIsbn
+		      ,cl.registeredOrNot
+		  FROM checkUpList cl
+		 WHERE cl.checkUpListNo = #{checkUpListNo}
+	</select>
+	
+	
+	<!-- 검수내역 1개 등록 -->
+	<insert id="insertCheckUpList" parameterType="CheckUpList">
+		INSERT INTO checkUpList(checkUpListNo
+							   ,acquisitionNo
+							   ,checkUpNo
+							   ,registeredDate
+							   ,checkUpResult
+							   ,memo
+							   ,checkUpIsbn
+							   ,registeredOrNot)
+				<!-- 없으면 YYMMDD0001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->			   
+		VALUES ((SELECT TO_CHAR(sysdate, 'YYMMDD')||NVL(LPAD(MAX(SUBSTR(cl.checkUpListNo, 7, 4))+1, 4, '0'), '0001')
+			     FROM checkUpList cl
+			    WHERE TO_CHAR(sysdate, 'YYMMDD') = SUBSTR(cl.checkUpListNo, 1, 6))
+			   ,#{acquisitionNo}
+			   ,#{checkUpNo}
+			   ,sysdate
+			   ,#{checkUpResult}
+			   ,#{memo}
+			   ,#{checkUpIsbn}
+			   ,NULL)
+	</insert>
+	
+	
+	
+	<!-- 검수상세 정보 1개 수정 -->
+	<update id="updateCheckUpList" parameterType="CheckUpList">
+		UPDATE checkUpList cl
+		<set>
+			<if test="acquisitionNo != null">
+				cl.acquisitionNo = #{acquisitionNo},
+			</if>
+			<if test="checkUpNo != null">
+				cl.checkUpNo = #{checkUpNo},
+			</if>
+			<if test="checkUpResult != null">
+				cl.checkUpResult = #{checkUpResult},
+			</if>
+			<if test="memo != null">
+				cl.memo = #{memo},
+			</if>
+			<if test="checkUpIsbn != null">
+				cl.checkUpIsbn = #{checkUpIsbn},
+			</if>
+			<if test="registeredOrNot != null">
+				cl.registeredOrNot = #{registeredOrNot},
+			</if>
+			cl.modifiedDate = sysdate
+		</set>
+		WHERE cl.checkUpListNo = #{checkUpListNo}
+		<trim prefix="SET" suffixOverrides=","/>
+	</update>
+
+
+
+</mapper>

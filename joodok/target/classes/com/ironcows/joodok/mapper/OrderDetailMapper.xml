@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.OrderDetailMapper">
+
+	<!-- 주문내역 1개 선택-->
+	<select id="getOneOrderDetail" parameterType="OrderDetail" resultType="OrderDetail">
+		SELECT od.orderDetailNo
+		      ,od.orderNo
+		      ,od.tradeEnterpriseNo
+		      ,od.budgetNo
+		      ,od.registeredDate
+		      ,od.modifiedDate
+		      ,od.orderIsbn
+		      ,od.orderCount
+		      ,od.eachPrice
+		  FROM orderDetail od
+		 WHERE od.orderDetailNo = #{orderDetailNo}
+	</select>
+	
+	<!-- 주문내역 1개 등록 -->
+	<insert id="insertOrderDetail" parameterType="OrderDetail">
+		INSERT INTO orderDetail(orderDetailNo
+							   ,orderNo
+							   ,registeredDate
+							   ,orderIsbn
+							   ,orderCount)
+				<!-- 없으면 YYMMDD0001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->			   
+		VALUES((SELECT TO_CHAR(sysdate, 'YYMMDD')||NVL(LPAD(MAX(SUBSTR(od.orderDetailNo, 7, 4))+1, 4, '0'), '0001')
+			     FROM orderDetail od
+			    WHERE TO_CHAR(sysdate, 'YYMMDD') = SUBSTR(od.orderDetailNo, 1, 6)) 
+			  ,#{orderNo}
+			  ,sysdate
+			  ,#{orderIsbn}
+			  ,#{orderCount})
+	</insert>
+
+</mapper>
+

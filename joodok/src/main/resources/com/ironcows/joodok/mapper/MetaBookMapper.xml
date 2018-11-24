@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.MetaBookMapper">
+
+
+	<!-- 도서 검색_서명 -->
+	<select id="searchAsTitle" parameterType="String" resultType="map">
+		SELECT mb.metaBookNo
+		      ,mb.title
+		      ,mb.subTitle
+		      ,mb.author
+		      ,mb.publisher
+		      ,mb.publishYear
+		      ,mb.bookType
+		      ,mb.ddc
+		  FROM metaBook mb
+		 WHERE mb.title LIKE '%' || #{value} || '%'
+	</select>
+	
+	<!-- 도서 검색_저자 -->
+	<select id="searchAsAuthor" parameterType="String" resultType="map">
+		SELECT mb.metaBookNo
+		      ,mb.title
+		      ,mb.subTitle
+		      ,mb.author
+		      ,mb.publisher
+		      ,mb.publishYear
+		      ,mb.bookType
+		      ,mb.ddc
+		  FROM metaBook mb
+		 WHERE mb.author LIKE '%' || #{value} || '%'
+	</select>
+	
+	<!-- 도서 검색_출판사 -->
+	<select id="searchAsPublisher" parameterType="String" resultType="map">
+		SELECT mb.metaBookNo
+		      ,mb.title
+		      ,mb.subTitle
+		      ,mb.author
+		      ,mb.publisher
+		      ,mb.publishYear
+		      ,mb.bookType
+		      ,mb.ddc
+		  FROM metaBook mb
+		 WHERE mb.publisher LIKE '%' || #{value} || '%'
+	</select>
+
+
+	<!-- 도서공통 1개 선택 -->
+	<select id="getOneMetaBook" parameterType="MetaBook" resultType="MetaBook">
+		SELECT mt.metaBookNo
+			  ,mt.registeredDate
+			  ,mt.modifiedDate
+			  ,mt.title
+			  ,mt.subTitle
+			  ,mt.volume
+			  ,mt.author
+			  ,mt.publisher
+			  ,mt.isbn
+			  ,mt.publishYear
+			  ,mt.page
+			  ,mt.price
+			  ,mt.language
+			  ,mt.ddc
+			  ,mt.nationDivision
+			  ,mt.bookType
+		  FROM metaBook mt
+		 WHERE mt.metaBookNo = #{metaBookNo}
+	</select>
+	
+	<!-- 도서공통 1개 등록 -->
+	<insert id="insertMetaBook" parameterType="MetaBook">
+		INSERT INTO metaBook(metaBookNo
+						    ,registeredDate
+						    ,title
+						    ,subTitle
+						    ,volume
+						    ,author
+						    ,publisher
+						    ,isbn
+						    ,publishYear
+						    ,page
+						    ,price
+						    ,language
+						    ,ddc
+						    ,nationDivision
+						    ,bookType)
+				<!-- 없으면 0000001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->
+		VALUES((SELECT NVL(LPAD(LTRIM(MAX(mb.metaBookNo), '0') + 1, 7, '0'), '0000001') as metaBookNo
+ 				  FROM metaBook mb)
+			  ,sysdate
+			  ,#{title}
+			  ,#{subTitle}
+			  ,#{volume}
+			  ,#{author}
+			  ,#{publisher}
+			  ,#{isbn}
+			  ,#{publishYear}
+			  ,#{page}
+			  ,#{price}
+			  ,#{language}
+			  ,#{ddc}
+			  ,#{nationDivision}
+			  ,#{bookType})
+	</insert>
+
+
+</mapper>

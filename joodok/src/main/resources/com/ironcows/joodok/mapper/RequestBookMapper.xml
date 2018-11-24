@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.RequestBookMapper">
+
+
+	
+	<!-- 사서의 도서요청 목록 조회를 위한 리스트 총 갯수 가져오기 -->
+	<select id="getRequestListNum" resultType="int">
+		SELECT count(*)
+		  FROM requestBook rb
+		 WHERE rb.status = '요청'
+	</select>
+	
+	
+	<!-- 사서의 도서요청 목록 조회를 위한 리스트 가져오기 -->
+	<select id="getRequestBookList" parameterType="int" resultType="map">
+		SELECT TO_CHAR(X.rnum) AS rnum
+		      ,X.requestBookNo
+		      ,X.status
+		      ,TO_CHAR(X.subject) AS subject
+		      ,TO_CHAR(X.registeredDate, 'YYYY-MM-DD') AS registeredDate
+		  FROM (SELECT rownum as rnum
+		              ,A.requestBookNo
+		              ,A.status
+		              ,A.subject
+		              ,A.registeredDate
+		          FROM (SELECT rb.requestBookNo
+		                      ,rb.status
+		                      ,rb.subject
+		                      ,rb.registeredDate
+		                  FROM requestBook rb
+		                 WHERE rb.status = '요청'
+		                 ORDER BY rb.requestBookNo DESC) A
+		         WHERE rownum &lt; (#{offset} + 10)) X
+		 WHERE X.rnum >= #{offset} 
+	</select>
+
+
+	<!-- 회원 본인의 도서요청 리스트 총 갯수 가져오기 -->
+	<select id="getMemberRequestListNum" parameterType="String" resultType="int">
+		SELECT count(*)
+		  FROM requestBook rb
+		 WHERE rb.memberNo = #{value}
+	</select>
+	
+	
+	<!-- 회원 본인의 도서요청 리스트 가져오기 -->
+	<select id="getMemberRequestList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(X.rnum) AS rnum
+		      ,X.requestBookNo
+		      ,X.status
+		      ,TO_CHAR(X.subject) AS subject
+		      ,TO_CHAR(X.registeredDate, 'YYYY-MM-DD') AS registeredDate
+		  FROM (SELECT rownum as rnum
+		              ,A.requestBookNo
+		              ,A.status
+		              ,A.subject
+		              ,A.registeredDate
+		          FROM (SELECT rb.requestBookNo
+		                      ,rb.status
+		                      ,rb.subject
+		                      ,rb.registeredDate
+		                  FROM requestBook rb
+		                 WHERE rb.memberNo = #{memberNo}
+		                 ORDER BY rb.requestBookNo DESC) A
+		         WHERE rownum &lt; (#{offset} + 10)) X
+		 WHERE X.rnum >= #{offset} 
+	</select>
+
+
+	<resultMap type="java.util.HashMap" id="getOneRequestBookMap">
+		<result property="REQUESTBOOKNO" column="requestBookNo"/>
+		<result property="MEMBERNO" column="memberNo"/>
+		<result property="ID" column="id"/>
+		<result property="NAME" column="name"/>
+		<result property="REGISTEREDDATE" column="registeredDate"/>
+		<result property="MODIFIEDDATE" column="modifiedDate"/>
+		<result property="STATUS" column="status"/>
+		<result property="REQUESTISBN" column="requestIsbn"/>
+		<result property="SUBJECT" column="subject"/>
+		<result property="CONTENT" column="content" jdbcType="CLOB" javaType="String"/>
+	</resultMap>
+	<!-- 도서요청 1개 가져오기_CLOB 처리 -->
+	<select id="getOneRequestBook_CLOB" parameterType="RequestBook" resultMap="getOneRequestBookMap">
+		SELECT rb.requestBookNo 
+		      ,rb.memberNo
+		      ,m.id
+		      ,m.name
+		      ,rb.registeredDate
+		      ,rb.modifiedDate
+		      ,rb.status
+		      ,rb.requestIsbn
+		      ,rb.subject
+		      ,rb.content
+		  FROM requestBook rb, member m
+		 WHERE rb.memberNo = m.memberNo
+		   AND rb.requestBookNo = #{requestBookNo}
+	</select>
+	
+	
+	<!-- 도서요청 1개 선택 -->
+	<select id="getOneRequestBook" parameterType="RequestBook" resultType="RequestBook">
+		SELECT rb.requestBookNo 
+			  ,rb.memberNo
+     		  ,TO_CHAR(rb.registeredDate, 'YYYY-MM-DD HH24:MI:SS')
+			  ,rb.modifiedDate
+			  ,rb.status
+			  ,rb.requestIsbn
+			  ,rb.subject
+			  ,TO_CHAR(rb.content) AS content
+		  FROM requestBook rb
+		 WHERE rb.requestBookNo = #{requestBookNo}
+	</select>
+	
+	<!-- 도서요청 1개 등록 -->
+	<insert id="insertRequestBook" parameterType="RequestBook">
+		INSERT INTO requestBook(requestBookNo
+							   ,memberNo
+							   ,registeredDate
+							   ,status
+							   ,requestIsbn
+							   ,subject
+							   ,content)
+				<!-- 없으면 YYMMDD0001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->			   
+		VALUES((SELECT TO_CHAR(sysdate, 'YYMMDD')||NVL(LPAD(MAX(SUBSTR(rb.requestBookNo, 7, 4))+1, 4, '0'), '0001')
+			     FROM requestBook rb
+			    WHERE TO_CHAR(sysdate, 'YYMMDD') = SUBSTR(rb.requestBookNo, 1, 6))
+			  ,#{memberNo}
+			  ,sysdate
+			  ,'요청'
+			  ,#{requestIsbn}
+			  ,#{subject}
+			  ,#{content, typeHandler=org.apache.ibatis.type.ClobTypeHandler})
+	</insert>
+	
+	<!-- 도서요청 1개 수정 -->
+	<update id="updateRequestBook" parameterType="RequestBook">
+		UPDATE requestBook rb
+		<set>
+			<if test="status != null">
+				rb.status = #{status},
+			</if>
+			<if test="requestIsbn != null">
+				rb.requestIsbn = #{requestIsbn},
+			</if>
+			<if test="subject != null">
+				rb.subject = #{subject},
+			</if>
+			<if test="content != null">
+				rb.content = #{content:NCLOB},
+			</if>
+			 	rb.modifiedDate = sysdate
+		</set>
+		 WHERE rb.requestBookNo = #{requestBookNo}
+		<trim prefix="SET" suffixOverrides=","/>
+	</update>
+
+</mapper>

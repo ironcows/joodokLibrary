@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+          
+<mapper namespace="com.ironcows.joodok.mapper.BorrowMapper">
+	
+	<!-- 연체 목록 가져오기 -->
+	<select id="getDelayedBookList" resultType="map">
+		SELECT v.borrowNo
+		      ,v.bookDetailNo
+		      ,v.title
+		      ,v.subTitle
+		      ,v.applicationMark
+		      ,TO_CHAR(v.registeredDate, 'YYYY-MM-DD') as registeredDate
+		      ,TO_CHAR(v.dueDate, 'YYYY-MM-DD') as dueDate
+		      ,v.status
+		      ,TO_CHAR(TRUNC(sysdate - v.duedate, 0), '00') as delayDay
+		      ,v.memberNo
+		      ,m.id
+		      ,m.name
+		  FROM v_member_borrow v, member m
+		 WHERE v.memberNo = m.memberNo
+		   AND v.status = '연체'	
+	</select>
+	
+	<!-- 도서 반납 할 때 도서를 추가하기 위해 해당도서의 대출정보 가져오기 -->
+	<select id="getBorrowInfo" parameterType="String" resultType="map">
+		SELECT v.borrowNo
+			  ,v.bookDetailNo
+		      ,v.title
+		      ,v.subTitle
+		      ,v.applicationMark
+		      ,TO_CHAR(v.registeredDate, 'YYYY-MM-DD') as borrowDay
+		      ,v.memberNo
+		  FROM v_member_borrow v
+		 WHERE v.bookDetailNo = #{value}
+		 ORDER BY v.registeredDate ASC
+	</select>
+	
+	
+	<!-- 회원 개인의 대출 목록 조회 -->
+	<select id="getMemberBorrow" parameterType="Member" resultType="map">
+		SELECT v.title
+		      ,v.subTitle
+		      ,v.applicationMark
+		      ,TO_CHAR(v.registeredDate, 'YYYY-MM-DD') as registeredDate
+		      ,TO_CHAR(v.dueDate, 'YYYY-MM-DD') as dueDate
+		      ,v.status
+		  FROM v_member_borrow v
+		 WHERE v.memberNo = #{memberNo}
+ 		 ORDER BY v.dueDate ASC
+	</select>
+	
+	<!-- 대출 1개 선택 -->
+	<select id="getOneBorrow" parameterType="Borrow" resultType="Borrow">
+		SELECT br.borrowNo
+			  ,br.memberNo
+			  ,br.bookDetailNo
+			  ,br.registeredDate
+			  ,br.modifiedDate
+			  ,br.status
+			  ,br.dueDate
+			  ,br.returnedDate
+		  FROM borrow br
+		 WHERE br.borrowNo = #{borrowNo}
+	</select>
+	
+	
+	<!-- 대출 1개 등록 -->
+	<insert id="insertBorrow" parameterType="Borrow">
+		INSERT INTO borrow(borrowNo
+						  ,memberNo
+						  ,bookDetailNo
+						  ,registeredDate
+						  ,status
+						  ,dueDate)
+				<!-- 없으면 YYMMDD0001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->		  
+		VALUES ((SELECT TO_CHAR(sysdate, 'YYMMDD')||NVL(LPAD(MAX(SUBSTR(b.borrowNo, 7, 4))+1, 4, '0'), '0001')
+			     FROM borrow b
+			    WHERE TO_CHAR(sysdate, 'YYMMDD') = SUBSTR(b.borrowNo, 1, 6))
+			   ,#{memberNo}
+			   ,#{bookDetailNo}
+			   ,sysdate
+			   ,'대출'
+			   ,TO_DATE(#{dueDate}, 'YYYY/MM/DD HH24:MI:SS') + 23/24) <!-- 해당 반납일자의 23시까지로 맞춘다. -->
+	</insert>
+	
+	
+	<!-- 대출 1개 수정 -->
+	<update id="updateBorrow" parameterType="Borrow">
+		UPDATE borrow br
+		<set>
+			<if test="status != null">
+				br.status = #{status},
+			</if>	
+			<if test="returnedDate != null">
+				br.returnedDate = sysdate,
+			</if>	
+				br.modifiedDate = sysdate
+		</set>
+		 WHERE br.borrowNo = #{borrowNo} 
+		 <trim prefix="SET" suffixOverrides=","/>
+	</update>
+
+	
+	
+	
+	
+	
+
+</mapper>

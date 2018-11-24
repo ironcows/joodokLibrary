@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.TradeEnterpriseMapper">
+
+	<!-- 거래처 1개 선택 -->
+	<select id="getOneTradeEnterprise" parameterType="TradeEnterprise" resultType="TradeEnterprise">
+		SELECT t.tradeEnterpriseNo
+			  ,t.registeredDate
+			  ,t.modifiedDate
+			  ,t.name
+			  ,t.type
+			  ,t.category
+			  ,t.bankName
+			  ,t.account
+			  ,t.creditGrade
+			  ,t.deliveryPeriod
+			  ,t.contactNumber
+			  ,t.fax
+			  ,t.address
+			  ,t.webAddress
+		  FROM tradeEnterprise t
+		 WHERE t.tradeEnterpriseNo = #{tradeEnterpriseNo}
+	</select>
+	
+	<select id="getAllTradeEnterprise" resultType="TradeEnterprise">
+		SELECT t.tradeEnterpriseNo
+			  ,t.registeredDate
+			  ,t.modifiedDate
+			  ,t.name
+			  ,t.type
+			  ,t.category
+			  ,t.bankName
+			  ,t.account
+			  ,t.creditGrade
+			  ,t.deliveryPeriod
+			  ,t.contactNumber
+			  ,t.fax
+			  ,t.address
+			  ,t.webAddress
+		  FROM tradeEnterprise t
+	</select>
+
+</mapper>
