@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+   PUBLIC "-//mybatis.org//DTD Config3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	
+
+	
+	<typeAliases>
+		<!-- 필요한 타입앨리어스 정의 -->
+		<typeAlias type="com.ironcows.joodok.dto.Acquisition" alias="Acquisition"/>
+		<typeAlias type="com.ironcows.joodok.dto.BookDetail" alias="BookDetail"/>
+		<typeAlias type="com.ironcows.joodok.dto.Borrow" alias="Borrow"/>
+		<typeAlias type="com.ironcows.joodok.dto.Budget" alias="Budget"/>
+		<typeAlias type="com.ironcows.joodok.dto.CheckUp" alias="CheckUp"/>
+		<typeAlias type="com.ironcows.joodok.dto.CheckUpList" alias="CheckUpList"/>
+		<typeAlias type="com.ironcows.joodok.dto.DetailLocation" alias="DetailLocation"/>
+		<typeAlias type="com.ironcows.joodok.dto.DiscardBook" alias="DiscardBook"/>
+		<typeAlias type="com.ironcows.joodok.dto.Grade" alias="Grade"/>
+		<typeAlias type="com.ironcows.joodok.dto.Librarian" alias="Librarian"/>
+		<typeAlias type="com.ironcows.joodok.dto.Location" alias="Location"/>
+		<typeAlias type="com.ironcows.joodok.dto.Member" alias="Member"/>
+		<typeAlias type="com.ironcows.joodok.dto.MetaBook" alias="MetaBook"/>
+		<typeAlias type="com.ironcows.joodok.dto.Orders" alias="Orders"/>
+		<typeAlias type="com.ironcows.joodok.dto.OrderDetail" alias="OrderDetail"/>
+		<typeAlias type="com.ironcows.joodok.dto.RequestBook" alias="RequestBook"/>
+		<typeAlias type="com.ironcows.joodok.dto.Reservation" alias="Reservation"/>
+		<typeAlias type="com.ironcows.joodok.dto.TradeEnterprise" alias="TradeEnterprise"/>
+		
+	</typeAliases>
+	
+	
+	<mappers>
+		<!-- 필요한 매퍼파일 등록 -->
+		<mapper resource="com/ironcows/joodok/mapper/AcquisitionMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/BookDetailMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/BorrowMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/BudgetMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/CheckUpListMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/CheckUpMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/DetailLocationMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/DiscardBookMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/GradeMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/LibrarianMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/LocationMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/LoginMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/MemberMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/MetaBookMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/OrderDetailMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/OrdersMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/RequestBookMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/ReservationMapper.xml"/>
+		<mapper resource="com/ironcows/joodok/mapper/TradeEnterpriseMapper.xml"/>
+	</mappers>
+	
+</configuration>
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          

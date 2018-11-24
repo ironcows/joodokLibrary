@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.BudgetMapper">
+	
+	<!-- 예산 1개 선택 -->
+	<select id="getOneBudget" parameterType="Budget" resultType="Budget">
+		SELECT b.budgetNo
+			  ,b.registeredDate
+			  ,b.modifiedDate
+			  ,b.year
+			  ,b.quarter
+			  ,b.allocation
+			  ,b.remainder
+			  ,b.limit
+			  ,b.budgetClassification
+		  FROM budget b
+		 WHERE b.budgetNo = #{budgetNo}
+	</select>
+	
+	<!-- 예산 전체 선택 -->
+	<select id="getAllBudget" resultType="Budget">
+		SELECT b.budgetNo
+			  ,TO_CHAR(b.registeredDate, 'YYYY-MM-DD') as registeredDate
+			  ,TO_CHAR(b.modifiedDate, 'YYYY-MM-DD') as modifiedDate
+			  ,b.year
+			  ,b.quarter
+			  ,b.allocation
+			  ,b.remainder
+			  ,b.limit
+			  ,b.budgetClassification
+		  FROM budget b
+		 ORDER BY b.budgetNo DESC
+	</select>
+
+
+</mapper>
+          

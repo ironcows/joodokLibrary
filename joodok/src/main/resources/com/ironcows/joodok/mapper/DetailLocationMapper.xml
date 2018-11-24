@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.DetailLocationMapper">
+	
+	
+	<!-- 상세위치 1개 선택 -->
+	<select id="getOneDetailLocation" parameterType="DetailLocation" resultType="DetailLocation">
+		SELECT d.detailLocationNo
+		      ,d.locationNo
+		      ,d.registeredDate
+		      ,d.modifiedDate
+		      ,d.detailLocationName
+		  FROM detailLocation d
+		 WHERE d.detailLocationNo = #{detailLocationNo}
+	</select>
+
+	<!-- 상세위치 전부 선택 -->
+	<select id="getAllDetailLocation" resultType="map">
+		SELECT d.detailLocationNo
+		      ,d.locationNo
+		      ,d.detailLocationName
+		  FROM detailLocation d
+	</select>
+
+
+</mapper>

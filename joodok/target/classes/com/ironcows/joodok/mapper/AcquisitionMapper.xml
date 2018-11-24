@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.AcquisitionMapper">
+	
+	
+	
+	<!-- 도서 공통정보 등록 화면에서 등록 대상을 선택하기 위한 목록 가져오기 -->
+	<select id="getAcquisitionForMetaBook" resultType="map">
+		SELECT v.acquisitionNo
+		      ,TO_CHAR(v.registeredDate, 'YYYY-MM-DD') as registeredDate
+		      ,v.category
+		      ,v.acquisitionIsbn
+		  FROM v_ready_metaBook v	
+	</select>
+	
+	<!-- 검수 화면에서 검수 대상을 선택하기 위한 목록 가져오기 -->
+	<select id="getAcquisitionForCheckUp" resultType="map">
+		SELECT v.acquisitionNo
+		      ,TO_CHAR(v.registeredDate, 'YYYY-MM-DD') as registeredDate
+		      ,v.category
+		      ,v.acquisitionIsbn
+		  FROM v_ready_checkUpList v	
+	</select>
+	
+	<!-- 주문 화면에서 주문 대상을 선택하기 위한 목록 가져오기 -->
+	<select id="getAcqusitionForOrder" resultType="map">
+		SELECT acquisitionNo 
+		      ,a.category
+		      ,a.acquisitionIsbn
+		      ,TO_CHAR(a.registeredDate, 'YYYY-MM-DD') as registeredDate
+		  FROM acquisition a
+		 WHERE a.acquisitionIsbn IN (SELECT a.acquisitionIsbn
+		                                   FROM acquisition a
+		                                  WHERE a.category NOT IN ('기증')
+		                                  MINUS
+		                                 SELECT cl.checkUpIsbn
+		                                   FROM checkUpList cl)
+		   AND a.acquisitionIsbn NOT IN (SELECT od.orderIsbn
+		                                   FROM orderDetail od)
+		ORDER BY a.registeredDate ASC	
+	</select>
+	
+	
+	<!-- 수서 등록 화면에서 소장하고 있는 도서인지 확인하기 -->
+	<select id="checkExistIsbn" parameterType="String" resultType="map">
+		SELECT a.acquisitionNo
+			  ,a.category
+			  ,a.acquisitionIsbn
+		  FROM acquisition a
+		 WHERE a.acquisitionIsbn = #{value}
+	</select>
+	
+	<!-- 수서 1개 선택 -->
+	<select id="getOneAcquisition" parameterType="Acquisition" resultType="Acquisition">
+		SELECT a.acquisitionNo
+			  ,a.librarianNo
+			  ,a.registeredDate
+			  ,a.modifiedDate
+			  ,a.category
+			  ,a.acquisitionIsbn
+		  FROM acquisition a
+		 WHERE a.acquisitionNo = #{acquisitionNo}
+	</select>
+
+	<!-- 수서 1개 등록 -->
+	<insert id="insertAcquisition" parameterType="Acquisition">
+		INSERT INTO acquisition (acquisitionNo
+								,librarianNo
+								,registeredDate
+								,category
+								,acquisitionIsbn)
+				<!-- 없으면 YYMMDD0001 부터, 있으면 가장 최근 등록된 레코드의 값에서 자동으로 1씩 증가하게 하자 -->
+		VALUES((SELECT TO_CHAR(sysdate, 'YYMMDD')||NVL(LPAD(MAX(SUBSTR(a.acquisitionNo, 7, 4))+1, 4, '0'), '0001')
+			     FROM acquisition a
+			    WHERE TO_CHAR(sysdate, 'YYMMDD') = SUBSTR(a.acquisitionNo, 1, 6))  
+			  , #{librarianNo}
+			  , sysdate
+			  , #{category}
+			  , #{acquisitionIsbn})
+	
+	</insert>
+	
+	
+	<!-- 수서 1개 수정 -->
+	<update id="updateAcquisition" parameterType="Acquisition">
+		UPDATE acquisition a
+		<set>
+			<if test="category != null">
+				a.category = #{category},
+			</if>
+			<if test="acquisitionIsbn != null">
+				a.acquisitionIsbn = #{acquisitionIsbn},
+			</if>
+				a.modifiedDate = sysdate
+		</set>
+		 WHERE a.acquisitionNo = #{acquisitionNo}
+		 <trim prefix="SET" suffixOverrides=","/>
+	</update>
+	
+	
+	
+
+</mapper>

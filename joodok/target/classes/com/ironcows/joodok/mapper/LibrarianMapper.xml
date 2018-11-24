@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="com.ironcows.joodok.mapper.LibrarianMapper">
+	
+	<!-- 사서 1명 선택 -->
+	<select id="getOneLibrarian" parameterType="Librarian" resultType="Librarian">
+		SELECT l.librarianNo
+			  ,l.registeredDate
+			  ,l.modifiedDate
+			  ,l.id
+			  ,l.password
+			  ,l.name
+			  ,l.contactNumber
+		  FROM librarian l
+		 WHERE l.librarianNo = #{librarianNo}
+	</select>
+	
+
+</mapper>
